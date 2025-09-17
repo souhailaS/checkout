@@ -1,331 +1,1051 @@
 name: Build and Test
-
-on:
-  pull_request:
+true:
+  pull_request: null
   push:
     branches:
-      - main
-      - releases/*
-
-
-# Note that when you see patterns like "ref: test-data/v2/basic" within this workflow,
-# these refer to "test-data" branches on this actions/checkout repo.
-# (For example, test-data/v2/basic -> https://github.com/actions/checkout/tree/test-data/v2/basic)
-
+    - main
+    - releases/*
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24.x
-      - uses: actions/checkout@v4.1.6
-      - run: npm ci
-      - run: npm run build
-      - run: npm run format-check
-      - run: npm run lint
-      - run: npm test
-      - name: Verify no unstaged changes
-        run: __test__/verify-no-unstaged-changes.sh
+    - name: '[Instrumentation] Job Start - build'
+      run: 'echo "::notice::JOB_START::build::$(date -u +%s%N)"
 
+        echo "RUNNER_INFO: $(uname -a)"
+
+        '
+    - name: '[Instrumentation] Pre-step-0'
+      run: 'echo "::notice::DETERMINISM_START::build::0::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+    - name: '[Instrumentation] Post-step-0'
+      run: 'echo "::notice::DETERMINISM_END::build::0::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-step-1'
+      run: 'echo "::notice::DETERMINISM_START::build::1::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Post-step-1'
+      run: 'echo "::notice::DETERMINISM_END::build::1::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-step-2'
+      run: 'echo "::notice::DETERMINISM_START::build::2::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - run: npm ci
+    - name: '[Instrumentation] Post-step-2'
+      run: 'echo "::notice::DETERMINISM_END::build::2::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-step-3'
+      run: 'echo "::notice::DETERMINISM_START::build::3::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - run: npm run build
+    - name: '[Instrumentation] Post-step-3'
+      run: 'echo "::notice::DETERMINISM_END::build::3::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-step-4'
+      run: 'echo "::notice::DETERMINISM_START::build::4::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - run: npm run format-check
+    - name: '[Instrumentation] Post-step-4'
+      run: 'echo "::notice::DETERMINISM_END::build::4::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-step-5'
+      run: 'echo "::notice::DETERMINISM_START::build::5::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - run: npm run lint
+    - name: '[Instrumentation] Post-step-5'
+      run: 'echo "::notice::DETERMINISM_END::build::5::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-step-6'
+      run: 'echo "::notice::DETERMINISM_START::build::6::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - run: npm test
+    - name: '[Instrumentation] Post-step-6'
+      run: 'echo "::notice::DETERMINISM_END::build::6::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify no unstaged changes'
+      run: 'echo "::notice::DETERMINISM_START::build::7::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify no unstaged changes
+      run: __test__/verify-no-unstaged-changes.sh
+    - name: '[Instrumentation] Post-Verify no unstaged changes'
+      run: 'echo "::notice::DETERMINISM_END::build::7::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Job End - build'
+      run: 'echo "::notice::JOB_END::build::$(date -u +%s%N)"
+
+        '
   test:
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - name: '[Instrumentation] Job Start - test'
+      run: 'echo "::notice::JOB_START::test::$(date -u +%s%N)"
+
+        echo "RUNNER_INFO: $(uname -a)"
+
+        '
+    - name: '[Instrumentation] Pre-Checkout'
+      run: 'echo "::notice::DETERMINISM_START::test::0::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout
+      uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Post-Checkout'
+      run: 'echo "::notice::DETERMINISM_END::test::0::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_START::test::1::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout basic
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_END::test::1::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test::2::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify basic
+      run: __test__/verify-basic.sh
+      shell: bash
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test::2::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Modify work tree'
+      run: 'echo "::notice::DETERMINISM_START::test::3::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Modify work tree
+      run: __test__/modify-work-tree.sh
+      shell: bash
+    - name: '[Instrumentation] Post-Modify work tree'
+      run: 'echo "::notice::DETERMINISM_END::test::3::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout clean'
+      run: 'echo "::notice::DETERMINISM_START::test::4::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout clean
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout clean'
+      run: 'echo "::notice::DETERMINISM_END::test::4::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify clean'
+      run: 'echo "::notice::DETERMINISM_START::test::5::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify clean
+      run: __test__/verify-clean.sh
+      shell: bash
+    - name: '[Instrumentation] Post-Verify clean'
+      run: 'echo "::notice::DETERMINISM_END::test::5::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout side by side 1'
+      run: 'echo "::notice::DETERMINISM_START::test::6::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout side by side 1
+      uses: ./
+      with:
+        path: side-by-side-1
+        ref: test-data/v2/side-by-side-1
+    - name: '[Instrumentation] Post-Checkout side by side 1'
+      run: 'echo "::notice::DETERMINISM_END::test::6::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout side by side 2'
+      run: 'echo "::notice::DETERMINISM_START::test::7::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout side by side 2
+      uses: ./
+      with:
+        path: side-by-side-2
+        ref: test-data/v2/side-by-side-2
+    - name: '[Instrumentation] Post-Checkout side by side 2'
+      run: 'echo "::notice::DETERMINISM_END::test::7::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify side by side'
+      run: 'echo "::notice::DETERMINISM_START::test::8::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify side by side
+      run: __test__/verify-side-by-side.sh
+      shell: bash
+    - name: '[Instrumentation] Post-Verify side by side'
+      run: 'echo "::notice::DETERMINISM_END::test::8::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Fetch filter'
+      run: 'echo "::notice::DETERMINISM_START::test::9::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Fetch filter
+      uses: ./
+      with:
+        filter: blob:none
+        path: fetch-filter
+    - name: '[Instrumentation] Post-Fetch filter'
+      run: 'echo "::notice::DETERMINISM_END::test::9::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify fetch filter'
+      run: 'echo "::notice::DETERMINISM_START::test::10::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify fetch filter
+      run: __test__/verify-fetch-filter.sh
+    - name: '[Instrumentation] Post-Verify fetch filter'
+      run: 'echo "::notice::DETERMINISM_END::test::10::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Sparse checkout'
+      run: 'echo "::notice::DETERMINISM_START::test::11::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Sparse checkout
+      uses: ./
+      with:
+        path: sparse-checkout
+        sparse-checkout: '__test__
+
+          .github
+
+          dist
+
+          '
+    - name: '[Instrumentation] Post-Sparse checkout'
+      run: 'echo "::notice::DETERMINISM_END::test::11::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify sparse checkout'
+      run: 'echo "::notice::DETERMINISM_START::test::12::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify sparse checkout
+      run: __test__/verify-sparse-checkout.sh
+    - name: '[Instrumentation] Post-Verify sparse checkout'
+      run: 'echo "::notice::DETERMINISM_END::test::12::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Disabled sparse checkout'
+      run: 'echo "::notice::DETERMINISM_START::test::13::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Disabled sparse checkout
+      uses: ./
+      with:
+        path: sparse-checkout
+    - name: '[Instrumentation] Post-Disabled sparse checkout'
+      run: 'echo "::notice::DETERMINISM_END::test::13::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify disabled sparse checkout'
+      run: 'echo "::notice::DETERMINISM_START::test::14::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify disabled sparse checkout
+      run: set -x && ls -l sparse-checkout/src/git-command-manager.ts
+      shell: bash
+    - name: '[Instrumentation] Post-Verify disabled sparse checkout'
+      run: 'echo "::notice::DETERMINISM_END::test::14::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Sparse checkout (non-cone mode)'
+      run: 'echo "::notice::DETERMINISM_START::test::15::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Sparse checkout (non-cone mode)
+      uses: ./
+      with:
+        path: sparse-checkout-non-cone-mode
+        sparse-checkout: '/__test__/
+
+          /.github/
+
+          /dist/
+
+          '
+        sparse-checkout-cone-mode: false
+    - name: '[Instrumentation] Post-Sparse checkout (non-cone mode)'
+      run: 'echo "::notice::DETERMINISM_END::test::15::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify sparse checkout (non-cone mode)'
+      run: 'echo "::notice::DETERMINISM_START::test::16::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify sparse checkout (non-cone mode)
+      run: __test__/verify-sparse-checkout-non-cone-mode.sh
+    - name: '[Instrumentation] Post-Verify sparse checkout (non-cone mode)'
+      run: 'echo "::notice::DETERMINISM_END::test::16::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout LFS'
+      run: 'echo "::notice::DETERMINISM_START::test::17::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout LFS
+      uses: ./
+      with:
+        lfs: true
+        path: lfs
+        ref: test-data/v2/lfs
+        repository: actions/checkout
+    - name: '[Instrumentation] Post-Checkout LFS'
+      run: 'echo "::notice::DETERMINISM_END::test::17::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify LFS'
+      run: 'echo "::notice::DETERMINISM_START::test::18::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify LFS
+      run: __test__/verify-lfs.sh
+      shell: bash
+    - name: '[Instrumentation] Post-Verify LFS'
+      run: 'echo "::notice::DETERMINISM_END::test::18::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout submodules false'
+      run: 'echo "::notice::DETERMINISM_START::test::19::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout submodules false
+      uses: ./
+      with:
+        path: submodules-false
+        ref: test-data/v2/submodule-ssh-url
+    - name: '[Instrumentation] Post-Checkout submodules false'
+      run: 'echo "::notice::DETERMINISM_END::test::19::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify submodules false'
+      run: 'echo "::notice::DETERMINISM_START::test::20::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify submodules false
+      run: __test__/verify-submodules-false.sh
+    - name: '[Instrumentation] Post-Verify submodules false'
+      run: 'echo "::notice::DETERMINISM_END::test::20::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout submodules true'
+      run: 'echo "::notice::DETERMINISM_START::test::21::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout submodules true
+      uses: ./
+      with:
+        path: submodules-true
+        ref: test-data/v2/submodule-ssh-url
+        submodules: true
+    - name: '[Instrumentation] Post-Checkout submodules true'
+      run: 'echo "::notice::DETERMINISM_END::test::21::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify submodules true'
+      run: 'echo "::notice::DETERMINISM_START::test::22::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify submodules true
+      run: __test__/verify-submodules-true.sh
+    - name: '[Instrumentation] Post-Verify submodules true'
+      run: 'echo "::notice::DETERMINISM_END::test::22::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout submodules recursive'
+      run: 'echo "::notice::DETERMINISM_START::test::23::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout submodules recursive
+      uses: ./
+      with:
+        path: submodules-recursive
+        ref: test-data/v2/submodule-ssh-url
+        submodules: recursive
+    - name: '[Instrumentation] Post-Checkout submodules recursive'
+      run: 'echo "::notice::DETERMINISM_END::test::23::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify submodules recursive'
+      run: 'echo "::notice::DETERMINISM_START::test::24::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify submodules recursive
+      run: __test__/verify-submodules-recursive.sh
+    - name: '[Instrumentation] Post-Verify submodules recursive'
+      run: 'echo "::notice::DETERMINISM_END::test::24::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Remove basic'
+      run: 'echo "::notice::DETERMINISM_START::test::25::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - if: runner.os != 'windows'
+      name: Remove basic
+      run: rm -rf basic
+    - name: '[Instrumentation] Post-Remove basic'
+      run: 'echo "::notice::DETERMINISM_END::test::25::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Remove basic (Windows)'
+      run: 'echo "::notice::DETERMINISM_START::test::26::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - if: runner.os == 'windows'
+      name: Remove basic (Windows)
+      run: rmdir /s /q basic
+      shell: cmd
+    - name: '[Instrumentation] Post-Remove basic (Windows)'
+      run: 'echo "::notice::DETERMINISM_END::test::26::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Override git version'
+      run: 'echo "::notice::DETERMINISM_START::test::27::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - if: runner.os != 'windows'
+      name: Override git version
+      run: __test__/override-git-version.sh
+    - name: '[Instrumentation] Post-Override git version'
+      run: 'echo "::notice::DETERMINISM_END::test::27::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Override git version (Windows)'
+      run: 'echo "::notice::DETERMINISM_START::test::28::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - if: runner.os == 'windows'
+      name: Override git version (Windows)
+      run: __test__\\override-git-version.cmd
+    - name: '[Instrumentation] Post-Override git version (Windows)'
+      run: 'echo "::notice::DETERMINISM_END::test::28::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout basic using REST API'
+      run: 'echo "::notice::DETERMINISM_START::test::29::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout basic using REST API
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic using REST API'
+      run: 'echo "::notice::DETERMINISM_END::test::29::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test::30::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify basic
+      run: __test__/verify-basic.sh --archive
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test::30::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Job End - test'
+      run: 'echo "::notice::JOB_END::test::$(date -u +%s%N)"
+
+        '
     strategy:
       matrix:
-        runs-on: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.runs-on }}
-
-    steps:
-      # Clone this repo
-      - name: Checkout
-        uses: actions/checkout@v4.1.6
-
-      # Basic checkout
-      - name: Checkout basic
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify basic
-        shell: bash
-        run: __test__/verify-basic.sh
-
-      # Clean
-      - name: Modify work tree
-        shell: bash
-        run: __test__/modify-work-tree.sh
-      - name: Checkout clean
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify clean
-        shell: bash
-        run: __test__/verify-clean.sh
-
-      # Side by side
-      - name: Checkout side by side 1
-        uses: ./
-        with:
-          ref: test-data/v2/side-by-side-1
-          path: side-by-side-1
-      - name: Checkout side by side 2
-        uses: ./
-        with:
-          ref: test-data/v2/side-by-side-2
-          path: side-by-side-2
-      - name: Verify side by side
-        shell: bash
-        run: __test__/verify-side-by-side.sh
-
-      # Filter
-      - name: Fetch filter
-        uses: ./
-        with:
-          filter: 'blob:none'
-          path: fetch-filter
-
-      - name: Verify fetch filter
-        run: __test__/verify-fetch-filter.sh
-
-      # Sparse checkout
-      - name: Sparse checkout
-        uses: ./
-        with:
-          sparse-checkout: |
-            __test__
-            .github
-            dist
-          path: sparse-checkout
-
-      - name: Verify sparse checkout
-        run: __test__/verify-sparse-checkout.sh
-
-      # Disabled sparse checkout in existing checkout
-      - name: Disabled sparse checkout
-        uses: ./
-        with:
-          path: sparse-checkout
-
-      - name: Verify disabled sparse checkout
-        shell: bash
-        run: set -x && ls -l sparse-checkout/src/git-command-manager.ts
-
-      # Sparse checkout (non-cone mode)
-      - name: Sparse checkout (non-cone mode)
-        uses: ./
-        with:
-          sparse-checkout: |
-            /__test__/
-            /.github/
-            /dist/
-          sparse-checkout-cone-mode: false
-          path: sparse-checkout-non-cone-mode
-
-      - name: Verify sparse checkout (non-cone mode)
-        run: __test__/verify-sparse-checkout-non-cone-mode.sh
-
-      # LFS
-      - name: Checkout LFS
-        uses: ./
-        with:
-          repository: actions/checkout # hardcoded, otherwise doesn't work from a fork
-          ref: test-data/v2/lfs
-          path: lfs
-          lfs: true
-      - name: Verify LFS
-        shell: bash
-        run: __test__/verify-lfs.sh
-
-      # Submodules false
-      - name: Checkout submodules false
-        uses: ./
-        with:
-          ref: test-data/v2/submodule-ssh-url
-          path: submodules-false
-      - name: Verify submodules false
-        run: __test__/verify-submodules-false.sh
-
-      # Submodules one level
-      - name: Checkout submodules true
-        uses: ./
-        with:
-          ref: test-data/v2/submodule-ssh-url
-          path: submodules-true
-          submodules: true
-      - name: Verify submodules true
-        run: __test__/verify-submodules-true.sh
-
-      # Submodules recursive
-      - name: Checkout submodules recursive
-        uses: ./
-        with:
-          ref: test-data/v2/submodule-ssh-url
-          path: submodules-recursive
-          submodules: recursive
-      - name: Verify submodules recursive
-        run: __test__/verify-submodules-recursive.sh
-
-      # Basic checkout using REST API
-      - name: Remove basic
-        if: runner.os != 'windows'
-        run: rm -rf basic
-      - name: Remove basic (Windows)
-        if: runner.os == 'windows'
-        shell: cmd
-        run: rmdir /s /q basic
-      - name: Override git version
-        if: runner.os != 'windows'
-        run: __test__/override-git-version.sh
-      - name: Override git version (Windows)
-        if: runner.os == 'windows'
-        run: __test__\\override-git-version.cmd
-      - name: Checkout basic using REST API
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify basic
-        run: __test__/verify-basic.sh --archive
-
-  test-proxy:
+        runs-on:
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
+  test-bypass-proxy:
+    env:
+      https_proxy: http://no-such-proxy:3128
+      no_proxy: api.github.com,github.com
     runs-on: ubuntu-latest
+    steps:
+    - name: '[Instrumentation] Job Start - test-bypass-proxy'
+      run: 'echo "::notice::JOB_START::test-bypass-proxy::$(date -u +%s%N)"
+
+        echo "RUNNER_INFO: $(uname -a)"
+
+        '
+    - name: '[Instrumentation] Pre-Checkout'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::0::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout
+      uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Post-Checkout'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::0::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::1::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout basic
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::1::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::2::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify basic
+      run: __test__/verify-basic.sh
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::2::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Remove basic'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::3::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Remove basic
+      run: rm -rf basic
+    - name: '[Instrumentation] Post-Remove basic'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::3::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Override git version'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::4::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Override git version
+      run: __test__/override-git-version.sh
+    - name: '[Instrumentation] Post-Override git version'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::4::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout basic using REST API'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::5::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout basic using REST API
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic using REST API'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::5::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test-bypass-proxy::6::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify basic
+      run: __test__/verify-basic.sh --archive
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test-bypass-proxy::6::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Job End - test-bypass-proxy'
+      run: 'echo "::notice::JOB_END::test-bypass-proxy::$(date -u +%s%N)"
+
+        '
+  test-git-container:
+    container: bitnami/git:latest
+    runs-on: ubuntu-latest
+    steps:
+    - name: '[Instrumentation] Job Start - test-git-container'
+      run: 'echo "::notice::JOB_START::test-git-container::$(date -u +%s%N)"
+
+        echo "RUNNER_INFO: $(uname -a)"
+
+        '
+    - name: '[Instrumentation] Pre-Checkout'
+      run: 'echo "::notice::DETERMINISM_START::test-git-container::0::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout
+      uses: actions/checkout@v4.1.6
+      with:
+        path: localClone
+    - name: '[Instrumentation] Post-Checkout'
+      run: 'echo "::notice::DETERMINISM_END::test-git-container::0::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_START::test-git-container::1::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout basic
+      uses: ./localClone
+      with:
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_END::test-git-container::1::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test-git-container::2::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify basic
+      run: "if [ ! -f \"./basic-file.txt\" ]; then\n    echo \"Expected basic file\
+        \ does not exist\"\n    exit 1\nfi\n\n# Verify .git folder\nif [ ! -d \"./.git\"\
+        \ ]; then\n  echo \"Expected ./.git folder to exist\"\n  exit 1\nfi\n\n# Verify\
+        \ auth token\ngit config --global --add safe.directory \"*\"\ngit fetch --no-tags\
+        \ --depth=1 origin +refs/heads/main:refs/remotes/origin/main\n"
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test-git-container::2::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Fix Checkout v4'
+      run: 'echo "::notice::DETERMINISM_START::test-git-container::3::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Fix Checkout v4
+      uses: actions/checkout@v4.1.6
+      with:
+        path: localClone
+    - name: '[Instrumentation] Post-Fix Checkout v4'
+      run: 'echo "::notice::DETERMINISM_END::test-git-container::3::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Job End - test-git-container'
+      run: 'echo "::notice::JOB_END::test-git-container::$(date -u +%s%N)"
+
+        '
+  test-output:
+    runs-on: ubuntu-latest
+    steps:
+    - name: '[Instrumentation] Job Start - test-output'
+      run: 'echo "::notice::JOB_START::test-output::$(date -u +%s%N)"
+
+        echo "RUNNER_INFO: $(uname -a)"
+
+        '
+    - name: '[Instrumentation] Pre-Checkout'
+      run: 'echo "::notice::DETERMINISM_START::test-output::0::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Checkout
+      uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Post-Checkout'
+      run: 'echo "::notice::DETERMINISM_END::test-output::0::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_START::test-output::1::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - id: checkout
+      name: Checkout basic
+      uses: ./
+      with:
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_END::test-output::1::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify output'
+      run: 'echo "::notice::DETERMINISM_START::test-output::2::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify output
+      run: "echo \"Commit: ${{ steps.checkout.outputs.commit }}\"\necho \"Ref: ${{\
+        \ steps.checkout.outputs.ref }}\"\n\nif [ \"${{ steps.checkout.outputs.ref\
+        \ }}\" != \"test-data/v2/basic\" ]; then\n  echo \"Expected ref to be test-data/v2/basic\"\
+        \n  exit 1\nfi\n\nif [ \"${{ steps.checkout.outputs.commit }}\" != \"82f71901cf8c021332310dcc8cdba84c4193ff5d\"\
+        \ ]; then\n  echo \"Expected commit to be 82f71901cf8c021332310dcc8cdba84c4193ff5d\"\
+        \n  exit 1\nfi\n"
+    - name: '[Instrumentation] Post-Verify output'
+      run: 'echo "::notice::DETERMINISM_END::test-output::2::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Fix Checkout'
+      run: 'echo "::notice::DETERMINISM_START::test-output::3::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Fix Checkout
+      uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Post-Fix Checkout'
+      run: 'echo "::notice::DETERMINISM_END::test-output::3::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Job End - test-output'
+      run: 'echo "::notice::JOB_END::test-output::$(date -u +%s%N)"
+
+        '
+  test-proxy:
     container:
       image: ghcr.io/actions/test-ubuntu-git:main.20240221.114913.703z
       options: --dns 127.0.0.1
+    env:
+      https_proxy: http://squid-proxy:3128
+    runs-on: ubuntu-latest
     services:
       squid-proxy:
         image: ubuntu/squid:latest
         ports:
-          - 3128:3128
-    env:
-      https_proxy: http://squid-proxy:3128
+        - 3128:3128
     steps:
-      # Clone this repo
-      - name: Checkout
-        uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Job Start - test-proxy'
+      run: 'echo "::notice::JOB_START::test-proxy::$(date -u +%s%N)"
 
-      # Basic checkout using git
-      - name: Checkout basic
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify basic
-        run: __test__/verify-basic.sh
+        echo "RUNNER_INFO: $(uname -a)"
 
-      # Basic checkout using REST API
-      - name: Remove basic
-        run: rm -rf basic
-      - name: Override git version
-        run: __test__/override-git-version.sh
-      - name: Basic checkout using REST API
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify basic
-        run: __test__/verify-basic.sh --archive
+        '
+    - name: '[Instrumentation] Pre-Checkout'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::0::$(date -u +%s%N)"
 
-  test-bypass-proxy:
-    runs-on: ubuntu-latest
-    env:
-      https_proxy: http://no-such-proxy:3128
-      no_proxy: api.github.com,github.com
-    steps:
-      # Clone this repo
-      - name: Checkout
-        uses: actions/checkout@v4.1.6
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
 
-      # Basic checkout using git
-      - name: Checkout basic
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify basic
-        run: __test__/verify-basic.sh
-      - name: Remove basic
-        run: rm -rf basic
+        '
+    - name: Checkout
+      uses: actions/checkout@v4.1.6
+    - name: '[Instrumentation] Post-Checkout'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::0::$(date -u +%s%N)"
 
-      # Basic checkout using REST API
-      - name: Override git version
-        run: __test__/override-git-version.sh
-      - name: Checkout basic using REST API
-        uses: ./
-        with:
-          ref: test-data/v2/basic
-          path: basic
-      - name: Verify basic
-        run: __test__/verify-basic.sh --archive
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
 
-  test-git-container:
-    runs-on: ubuntu-latest
-    container: bitnami/git:latest
-    steps:
-      # Clone this repo
-      - name: Checkout
-        uses: actions/checkout@v4.1.6
-        with:
-          path: localClone
+        '
+    - name: '[Instrumentation] Pre-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::1::$(date -u +%s%N)"
 
-      # Basic checkout using git
-      - name: Checkout basic
-        uses: ./localClone
-        with:
-          ref: test-data/v2/basic
-      - name: Verify basic
-        run: |
-          if [ ! -f "./basic-file.txt" ]; then
-              echo "Expected basic file does not exist"
-              exit 1
-          fi
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
 
-          # Verify .git folder
-          if [ ! -d "./.git" ]; then
-            echo "Expected ./.git folder to exist"
-            exit 1
-          fi
+        '
+    - name: Checkout basic
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Checkout basic'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::1::$(date -u +%s%N)"
 
-          # Verify auth token
-          git config --global --add safe.directory "*"
-          git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
 
-      # needed to make checkout post cleanup succeed
-      - name: Fix Checkout v4
-        uses: actions/checkout@v4.1.6
-        with:
-          path: localClone
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::2::$(date -u +%s%N)"
 
-  test-output:
-    runs-on: ubuntu-latest
-    steps:
-      # Clone this repo
-      - name: Checkout
-        uses: actions/checkout@v4.1.6
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
 
-      # Basic checkout using git
-      - name: Checkout basic
-        id: checkout
-        uses: ./
-        with:
-          ref: test-data/v2/basic
+        '
+    - name: Verify basic
+      run: __test__/verify-basic.sh
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::2::$(date -u +%s%N)"
 
-      # Verify output
-      - name: Verify output
-        run: |
-          echo "Commit: ${{ steps.checkout.outputs.commit }}"
-          echo "Ref: ${{ steps.checkout.outputs.ref }}"
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
 
-          if [ "${{ steps.checkout.outputs.ref }}" != "test-data/v2/basic" ]; then
-            echo "Expected ref to be test-data/v2/basic"
-            exit 1
-          fi
+        '
+    - name: '[Instrumentation] Pre-Remove basic'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::3::$(date -u +%s%N)"
 
-          if [ "${{ steps.checkout.outputs.commit }}" != "82f71901cf8c021332310dcc8cdba84c4193ff5d" ]; then
-            echo "Expected commit to be 82f71901cf8c021332310dcc8cdba84c4193ff5d"
-            exit 1
-          fi
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
 
-      # needed to make checkout post cleanup succeed
-      - name: Fix Checkout
-        uses: actions/checkout@v4.1.6
+        '
+    - name: Remove basic
+      run: rm -rf basic
+    - name: '[Instrumentation] Post-Remove basic'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::3::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Override git version'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::4::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Override git version
+      run: __test__/override-git-version.sh
+    - name: '[Instrumentation] Post-Override git version'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::4::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Basic checkout using REST API'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::5::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Basic checkout using REST API
+      uses: ./
+      with:
+        path: basic
+        ref: test-data/v2/basic
+    - name: '[Instrumentation] Post-Basic checkout using REST API'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::5::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Pre-Verify basic'
+      run: 'echo "::notice::DETERMINISM_START::test-proxy::6::$(date -u +%s%N)"
+
+        echo "ENV_SNAPSHOT=$(env | sort | sha256sum | cut -d'' '' -f1)"
+
+        '
+    - name: Verify basic
+      run: __test__/verify-basic.sh --archive
+    - name: '[Instrumentation] Post-Verify basic'
+      run: 'echo "::notice::DETERMINISM_END::test-proxy::6::$(date -u +%s%N)"
+
+        if [ -d "build" ]; then find build -type f -exec sha256sum {} \; fi
+
+        '
+    - name: '[Instrumentation] Job End - test-proxy'
+      run: 'echo "::notice::JOB_END::test-proxy::$(date -u +%s%N)"
+
+        '
